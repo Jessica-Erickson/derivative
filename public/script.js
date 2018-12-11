@@ -40,5 +40,9 @@ function setCanvasDimensions (newImage) {
 
 function getNewImageData (newImage) {
   var newImageData = ctx.getImageData(0,0,newImage.width,newImage.height);
-  socket.emit('data', newImageData);
+  socket.send({ 
+    data: newImageData.data, 
+    height: newImageData.height, 
+    width: newImageData.width
+  });
 }
