@@ -1,0 +1,27 @@
+{
+  "name": "derivative",
+  "version": "1.0.0",
+  "description": "The concept of this project was very simple; Take an image from the user and sort it in order to make an interesting derivative.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jessica-Erickson/derivative.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jessica-Erickson/derivative/issues"
+  },
+  "homepage": "https://github.com/Jessica-Erickson/derivative#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0"
+  }
+}
