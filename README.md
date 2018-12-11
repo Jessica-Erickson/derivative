@@ -24,17 +24,17 @@ The concept of this project was very simple; Take an image from the user and sor
 
 10. Repeat steps 6 - 9, until the entire image is sorted (when there are no coordinates left in the unsorted pixel array).
 
-Note: When a buffer pixel's coordinates are added to the frontier array, it is removed from the buffer array and replaced by another pixel's coordinates from the remaining unsorted pixels, if there are any.
+Note: When a buffer pixel's coordinates are added to the frontier array, it is removed from the buffer array and replaced by another pixel's coordinates from the remaining unsorted pixels array, if there are any.
 
 ## Next steps:
 
 The main problem with my sorter, as it is, is that it gets bogged down for large images. To remedy that, I am looking at offloading the storage of that object to a server with an open channel to the frontend using websockets.
 
-Another issue is that my means of calculating color similarity causes some unappealing pixel noise. To remedy that, I am going to change the color comparison from the averages of the rgba values to a value comparison to each color's hex codes.
+Another issue is that my means of calculating color similarity causes some unappealing pixel noise. To remedy that, I am going to change the color comparison from the averages of the rgba values to a value comparison of each color's hex codes.
 
 I would also like to implement different sorting methods that the user can choose, so that they can see all of the potential ways of seeing art and using art.
 
-Finally, I have a very sparse frontend. To remedy that, I am going to and add some significant styling. I want this project to be a public facing tool that shows both the value in remixing art and a potential use of computer programming.
+Finally, I have a very sparse frontend. To remedy that, I am going to add some significant styling. I want this project to be a public facing tool that shows both the value in remixing art and a potential use of computer programming.
 
 ## Contributors:
 
