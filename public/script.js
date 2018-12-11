@@ -1,45 +1,37 @@
 var input = document.getElementById('userImage');
 var canvas = document.getElementById('canvas')
 var ctx = canvas.getContext('2d');
-var newImage = new Image();
-var newImageData = {};
-var pixelGraph = {};
-var unsortedPixels = [];
-var bufferPixels = [];
-var sortedPixels = [];
-var adjacentPixels = [];
+var socket = io();
+
+socket.on('connect', () => {
+
+});
+
+socket.on('message', (message) => {
+  $('.messages').append(`<h1>'Something came along on the "message" channel: ${message}</h1>`);
+});
 
 input.addEventListener('change', setImageToCanvas);
 
 function setImageToCanvas (event) {
   if (event.target.files && event.target.files[0]) {
-    resetPixelGraph();
-    resetPixelArrays();
-    var imageURL = URL.createObjectURL(event.target.files[0]);
-    newImage.addEventListener('load', updateCanvasWithImage);
+    var imageUrl = URL.createObjectURL(event.target.files[0]);
+    var newImage = new Image();
+    newImage.addEventListener('load', () => {
+      updateCanvasWithImage(newImage);
+    });
     newImage.src = imageURL;
   }
 }
 
-function resetPixelGraph () {
-  pixelGraph = {};
-}
-
-function resetPixelArrays () {
-  unsortedPixels = [];
-  bufferPixels = [];
-  sortedPixels = [];
-  adjacentPixels = [];
-}
-
-function updateCanvasWithImage () {
-  setCanvasDimensions();
+function updateCanvasWithImage (newImage) {
+  setCanvasDimensions(newImage);
   ctx.drawImage(newImage,0,0);
-  getNewImageData();
+  getNewImageData(newImage);
   createPixelGraph();
   getStartingPixel();
   populateBufferPixels();
-  newImage.removeEventListener('load', updateCanvasWithImage);
+  newImage.removeEventListener('load', updateCanvasWithImage(newImage));
   resetNewImage();
   resetNewImageData();
   window.requestAnimationFrame(swapPixels);
@@ -188,12 +180,12 @@ function swapPixels () {
   window.requestAnimationFrame(swapPixels);
 }
 
-function setCanvasDimensions () {
+function setCanvasDimensions (newImage) {
   canvas.height = newImage.height;
   canvas.width = newImage.width;
 }
 
-function getNewImageData () {
+function getNewImageData (newImage) {
   newImageData = ctx.getImageData(0,0,newImage.width,newImage.height);
 }
 
@@ -229,10 +221,6 @@ function createPixelGraph () {
     }
     unsortedPixels.push(coordinates);
   }
-}
-
-function resetNewImage () {
-  newImage = new Image();
 }
 
 function resetNewImageData () {
