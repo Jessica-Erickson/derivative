@@ -4,7 +4,7 @@
   "description": "The concept of this project was very simple; Take an image from the user and sort it in order to make an interesting derivative.",
   "main": "script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
