@@ -26,6 +26,10 @@ The concept of this project was very simple; Take an image from the user and sor
 
 Note: When a buffer pixel's coordinates are added to the frontier array, it is removed from the buffer array and replaced by another pixel's coordinates from the remaining unsorted pixels, if there are any.
 
+## Example Result:
+
+![An image of a red panda that has been sorted.](./assets/derivative-panda.png)
+
 ## Next steps:
 
 The main problem with my sorter, as it is, is that it gets bogged down for large images. To remedy that, I am looking at offloading the storage of that object to a server with an open channel to the frontend using websockets.
