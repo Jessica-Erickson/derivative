@@ -8,6 +8,18 @@ function makeActive(e) {
 }
 
 function setImageToCanvas(e) {
+  if (e.target.files && e.target.files[0]) {
+    var newImage = new Image();
+    var imageURL = URL.createObjectURL(e.target.files[0]);
+    newImage.addEventListener('load', function() {
+      updateCanvasWithImage(newImage);
+      URL.revokeObjectURL(imageURL);
+    }, { once: true });
+    newImage.src = imageURL;
+  }
+}
+
+function updateCanvasWithImage() {
 
 }
 
