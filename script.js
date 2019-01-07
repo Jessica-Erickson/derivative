@@ -21,7 +21,10 @@ function setImageToCanvas(e) {
       URL.revokeObjectURL(imageURL);
     }, { once: true });
     newImage.src = imageURL;
-  }
+    document.querySelector('#errors').innerText = 'None';
+  } else if (e.target.files[0].size > 2097152) {
+    document.querySelector('#errors').innerText = 'Please select a smaller image to sort.';
+  } 
 }
 
 function updateCanvasWithImage(image) {
