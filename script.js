@@ -4,6 +4,11 @@ function makeActive(e) {
       option.classList.remove('active');
     });
     e.target.classList.add('active');
+  } else if (e.target.classList.contains('sort-img')) {
+    document.querySelectorAll('li').forEach(function(option) {
+      option.classList.remove('active');
+    });
+    e.target.parentElement.classList.add('active');
   }
 }
 
