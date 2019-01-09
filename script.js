@@ -174,15 +174,10 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
   var current = context.createImageData(1, 1);
   var swap = context.createImageData(1, 1);
 
-  current.data[0] = currentPixelValues[0];
-  current.data[1] = currentPixelValues[1];
-  current.data[2] = currentPixelValues[2];
-  current.data[3] = currentPixelValues[3];
-
-  swap.data[0] = swapPixelValues[0];
-  swap.data[1] = swapPixelValues[1];
-  swap.data[2] = swapPixelValues[2];
-  swap.data[3] = swapPixelValues[3];
+  for (var i = 0; i < 4; i++) {
+    current.data[i] = currentPixelValues[i];
+    swap.data[i] = swapPixelValues[i];
+  }
 
   context.putImageData(current, swapCoordinates[0], swapCoordinates[1]);
   context.putImageData(swap, currentCoordinates[0], currentCoordinates[1]);
