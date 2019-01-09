@@ -88,31 +88,45 @@ function createPixelGraph(data) {
 
 function startSort(graph, unsorted) {
   var method = document.querySelector('.active').innerText;
+  var startingPixel = unsorted[Math.floor(Math.random() * unsorted.length)];
+  var adjacent = [];
+
+  unsortedPixels = unsorted.filter(pixel => pixel !== startingPixel);
+  
+  graph[startingPixel].adjacent.forEach(pixel => {
+    adjacent.push(pixel);
+  });
 
   if (method === 'Virus ') {
-    virusSort(graph, unsorted);
+    virusSort(graph, unsorted, adjacent);
   } else if (method === 'Diamond ') {
-    diamondSort(graph, unsorted);
+    diamondSort(graph, unsorted, adjacent);
   } else {
-    bloomSort(graph, unsorted);
+    bloomSort(graph, unsorted, adjacent);
   }
 }
 
-function virusSort(pixelGraph, unsortedPixels) {
-  var startingPixel = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)];
-  var adjacentPixels = [];
-  unsortedPixels = unsortedPixels.filter(pixel => pixel !== startingPixel);
-  pixelGraph[startingPixel].adjacent.forEach(pixel => {
-    adjacentPixels.push(pixel);
-  });
-  virusSwap(pixelGraph, unsortedPixels, adjacentPixels);
-}
-
-function diamondSort(pixelGraph, unsortedPixels) {
+function virusSort(pixelGraph, unsortedPixels, adjacentPixels) {
   
 }
 
-function bloomSort(pixelGraph, unsortedPixels) {
+function diamondSort(pixelGraph, unsortedPixels, adjacentPixels) {
+  var currentPixel = adjacentPixels[0];
+  var cPHex = pixelGraph[currentPixel].rgba.reduce((acc, value) => {
+    var paddedHexValue = '0' + value.toString(16);
+    return acc += paddedHexValue.slice(-2);
+  }, '');
+
+  // find the closest value to that pixels sorted neighbors from all unsorted pixels
+
+  // swap the values of those pixels
+
+  // remove pixel from both unsortedPixels and adjacentPixels array
+
+  // set the new values to the canvas
+}
+
+function bloomSort(pixelGraph, unsortedPixels, adjacentPixels) {
   
 }
 
