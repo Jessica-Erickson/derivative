@@ -38,8 +38,8 @@ function updateCanvasWithImage(image) {
   createPixelGraph(imageData);
 }
 
-function Pixel (hex) {
-  this.hex = hex;
+function Pixel (r, g, b, a) {
+  this.rgba = [r, g, b, a];
   this.adjacent = [];
 }
 
@@ -61,13 +61,13 @@ function createPixelGraph(data) {
     var bottom = x + '-' + (y + 1);
     var left = (x - 1) + '-' + y;
 
-    var fullHex = '';
-    for (var j = 0; j < 3; j++) {
-      var hexStart = '0' + imageData[i + j].toString(16);
-      fullHex += hexStart.slice(-2);
-    }
+    pixelGraph[coordinates] = new Pixel(
+      imageData[i], 
+      imageData[i + 1], 
+      imageData[i + 2], 
+      imageData[i + 3]
+    );
 
-    pixelGraph[coordinates] = new Pixel(fullHex);
     if ((y - 1) >= 0) {
       pixelGraph[coordinates].adjacent.push(top);
     }
@@ -82,6 +82,8 @@ function createPixelGraph(data) {
     }
     unsortedPixels.push(coordinates);
   }
+
+  startSort(pixelGraph, unsortedPixels);
 }
 
 document.querySelector('ul').addEventListener('click', makeActive);
