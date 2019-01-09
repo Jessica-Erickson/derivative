@@ -131,7 +131,20 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels) {
     return acc;
   }, [0, 0, 0, 0]);
 
-  // find the closest value to that pixels sorted neighbors from all unsorted pixels
+  var closest = unsortedPixels.reduce((acc, coords) => {
+    var lastDiff = pixelGraph[acc].rgba.reduce((acc, value, index) => {
+      acc += Math.abs(value - targetValues[index]);
+    }, 0);
+
+    var currentDiff = pixelGraph[coords].rgba.reduce((acc, value, index) => {
+      acc += Math.abs(value - targetValues[index]);
+    }, 0);
+
+    if (currentDiff < lastDiff) {
+      acc = coords;
+    }
+    return acc;
+  }, '');
 
   // swap the values of those pixels
 
