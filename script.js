@@ -21,8 +21,9 @@ function setImageToCanvas(e) {
       URL.revokeObjectURL(imageURL);
     }, { once: true });
     newImage.src = imageURL;
-    document.querySelector('#errors').innerText = 'None';
-  } else if (e.target.files[0].size > 2097152) {
+    document.querySelector('#errors').innerText = 'Please wait while your picture sorts.';
+    document.querySelector('input').disabled = true;
+  } else if (e.target.files[0] && e.target.files[0].size > 2097152) {
     document.querySelector('#errors').innerText = 'Please select a smaller image to sort.';
   } 
 }
@@ -115,6 +116,8 @@ function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
 
 function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
   if (unsortedPixels.length === 1) {
+    document.querySelector('input').disabled = false;
+    document.querySelector('#errors').innerText = 'Done! Feel free to select another image to sort.';
     return console.log('done');
   }
 
