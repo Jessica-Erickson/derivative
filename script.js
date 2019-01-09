@@ -86,5 +86,29 @@ function createPixelGraph(data) {
   startSort(pixelGraph, unsortedPixels);
 }
 
+function startSort(graph, unsorted) {
+  var method = document.querySelector('.active').innerText;
+
+  if (method === 'Virus') {
+    virusSort(graph, unsorted);
+  } else if (method === 'Diamond') {
+    diamondSort(graph, unsorted);
+  } else {
+    bloomSort(graph, unsorted);
+  }
+}
+
+function virusSort(pixelGraph, unsortedPixels) {
+  
+}
+
+function diamondSort(pixelGraph, unsortedPixels) {
+  
+}
+
+function bloomSort(pixelGraph, unsortedPixels) {
+  
+}
+
 document.querySelector('ul').addEventListener('click', makeActive);
 document.querySelector('input').addEventListener('change', setImageToCanvas);
