@@ -21,7 +21,7 @@ function setImageToCanvas(e) {
       URL.revokeObjectURL(imageURL);
     }, { once: true });
     newImage.src = imageURL;
-    document.querySelector('#errors').innerText = 'Please wait while your picture sorts.';
+    document.querySelector('#errors').innerText = 'Please wait while your picture is sorted.';
     document.querySelector('input').disabled = true;
   } else if (e.target.files[0] && e.target.files[0].size > 2097152) {
     document.querySelector('#errors').innerText = 'Please select a smaller image to sort.';
@@ -132,7 +132,36 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
     }
   });
 
-  var sumValues = pixelGraph[currentPixel].adjacent.reduce((acc, pixel) => {
+  var sumValues = getSumValues(pixelGraph, currentPixel);
+
+  var targetValues = getTargetValues(sumValues);
+
+  var closest = getClosest(unsortedPixels, pixelGraph, targetValues);
+
+  swapPixels(currentPixel, closest, pixelGraph, context);
+
+  window.requestAnimationFrame(function() {
+    diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context);
+  });
+}
+
+function bloomSort(pixelGraph, unsorted, adjacentPixels, context) {
+  
+}
+
+function handleCurrentPixel() {
+  pixelGraph[currentPixel].isSorted = true;
+  unsortedPixels = unsortedPixels.filter(pixel => pixel !== currentPixel);
+  adjacentPixels = adjacentPixels.filter(pixel => pixel !== currentPixel);
+  pixelGraph[currentPixel].adjacent.forEach(pixel => {
+    if (!pixelGraph[pixel].isSorted) {
+      adjacentPixels.push(pixel);
+    }
+  });
+}
+
+function getSumValues(pixelGraph, currentPixel) {
+  return pixelGraph[currentPixel].adjacent.reduce((acc, pixel) => {
     if (pixelGraph[pixel].isSorted) {
       pixelGraph[pixel].rgba.forEach((value, index) => {
         acc[index] += value;
@@ -141,15 +170,19 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
     }
     return acc;
   }, [0, 0, 0, 0, 0]);
+}
 
-  var targetValues = sumValues.reduce((acc, value, index, array) => {
+function getTargetValues(sumValues) {
+  return sumValues.reduce((acc, value, index, array) => {
     if (index < 4) {
       acc[index] = Math.floor(value / array[4]);
     }
     return acc;
   }, [0, 0, 0, 0]);
+}
 
-  var closest = unsortedPixels.reduce((acc, coords) => {
+function getClosest(unsortedPixels, pixelGraph, targetValues) {
+  return unsortedPixels.reduce((acc, coords) => {
     if (acc !== '') {
       var lastDiff = pixelGraph[acc].rgba.reduce((acc, value, index) => {
         return acc += Math.abs(value - targetValues[index]);
@@ -167,7 +200,9 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
     }
     return acc;
   }, '');
+}
 
+function swapPixels(currentPixel, closest, pixelGraph, context) {
   var currentPixelValues = pixelGraph[currentPixel].rgba;
   var swapPixelValues = pixelGraph[closest].rgba;
   var currentCoordinates = currentPixel.split('-');
@@ -185,14 +220,6 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
 
   pixelGraph[currentPixel].rgba = swapPixelValues;
   pixelGraph[closest].rgba = currentPixelValues;
-
-  window.requestAnimationFrame(function() {
-    diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context);
-  });
-}
-
-function bloomSort(pixelGraph, unsorted, adjacentPixels, context) {
-  
 }
 
 document.querySelector('ul').addEventListener('click', makeActive);
