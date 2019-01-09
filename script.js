@@ -89,9 +89,9 @@ function createPixelGraph(data) {
 function startSort(graph, unsorted) {
   var method = document.querySelector('.active').innerText;
 
-  if (method === 'Virus') {
+  if (method === 'Virus ') {
     virusSort(graph, unsorted);
-  } else if (method === 'Diamond') {
+  } else if (method === 'Diamond ') {
     diamondSort(graph, unsorted);
   } else {
     bloomSort(graph, unsorted);
@@ -99,7 +99,13 @@ function startSort(graph, unsorted) {
 }
 
 function virusSort(pixelGraph, unsortedPixels) {
-  
+  var startingPixel = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)];
+  var adjacentPixels = [];
+  unsortedPixels = unsortedPixels.filter(pixel => pixel !== startingPixel);
+  pixelGraph[startingPixel].adjacent.forEach(pixel => {
+    adjacentPixels.push(pixel);
+  });
+  virusSwap(pixelGraph, unsortedPixels, adjacentPixels);
 }
 
 function diamondSort(pixelGraph, unsortedPixels) {
