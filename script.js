@@ -35,7 +35,7 @@ function updateCanvasWithImage(image) {
   ctx.drawImage(image, 0, 0);
 
   var imageData = ctx.getImageData(0,0, image.width, image.height);
-  createPixelGraph(imageData);
+  createPixelGraph(imageData, ctx);
 }
 
 function Pixel (r, g, b, a) {
@@ -44,7 +44,7 @@ function Pixel (r, g, b, a) {
   this.isSorted = false;
 }
 
-function createPixelGraph(data) {
+function createPixelGraph(data, context) {
   var pixelGraph = {};
   var unsortedPixels = [];
   var imageData = data.data;
@@ -84,10 +84,10 @@ function createPixelGraph(data) {
     unsortedPixels.push(coordinates);
   }
 
-  startSort(pixelGraph, unsortedPixels);
+  startSort(pixelGraph, unsortedPixels, context);
 }
 
-function startSort(graph, unsorted) {
+function startSort(graph, unsorted, ctx) {
   var method = document.querySelector('.active').innerText;
   var startingPixel = unsorted[Math.floor(Math.random() * unsorted.length)];
   var adjacent = [];
@@ -101,20 +101,34 @@ function startSort(graph, unsorted) {
   graph[startingPixel].isSorted = true;
 
   if (method === 'Virus ') {
-    virusSort(graph, unsorted, adjacent);
+    virusSort(graph, unsorted, adjacent, ctx);
   } else if (method === 'Diamond ') {
-    diamondSort(graph, unsorted, adjacent);
+    diamondSort(graph, unsorted, adjacent, ctx);
   } else {
-    bloomSort(graph, unsorted, adjacent);
+    bloomSort(graph, unsorted, adjacent, ctx);
   }
 }
 
-function virusSort(pixelGraph, unsortedPixels, adjacentPixels) {
+function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
   
 }
 
-function diamondSort(pixelGraph, unsortedPixels, adjacentPixels) {
+function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
+  if (unsortedPixels.length === 1) {
+    return console.log('done');
+  }
+
   var currentPixel = adjacentPixels[0];
+
+  pixelGraph[currentPixel].isSorted = true;
+  unsortedPixels = unsortedPixels.filter(pixel => pixel !== currentPixel);
+  adjacentPixels = adjacentPixels.filter(pixel => pixel !== currentPixel);
+  pixelGraph[currentPixel].adjacent.forEach(pixel => {
+    if (!pixelGraph[pixel].isSorted) {
+      adjacentPixels.push(pixel);
+    }
+  });
+
   var sumValues = pixelGraph[currentPixel].adjacent.reduce((acc, pixel) => {
     if (pixelGraph[pixel].isSorted) {
       pixelGraph[pixel].rgba.forEach((value, index) => {
@@ -132,13 +146,17 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels) {
   }, [0, 0, 0, 0]);
 
   var closest = unsortedPixels.reduce((acc, coords) => {
-    var lastDiff = pixelGraph[acc].rgba.reduce((acc, value, index) => {
-      acc += Math.abs(value - targetValues[index]);
-    }, 0);
+    if (acc !== '') {
+      var lastDiff = pixelGraph[acc].rgba.reduce((acc, value, index) => {
+        return acc += Math.abs(value - targetValues[index]);
+      }, 0);
 
-    var currentDiff = pixelGraph[coords].rgba.reduce((acc, value, index) => {
-      acc += Math.abs(value - targetValues[index]);
-    }, 0);
+      var currentDiff = pixelGraph[coords].rgba.reduce((acc, value, index) => {
+        return acc += Math.abs(value - targetValues[index]);
+      }, 0);
+    } else {
+      acc = coords;
+    }
 
     if (currentDiff < lastDiff) {
       acc = coords;
@@ -146,14 +164,35 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels) {
     return acc;
   }, '');
 
-  // swap the values of those pixels
+  var currentPixelValues = pixelGraph[currentPixel].rgba;
+  var swapPixelValues = pixelGraph[closest].rgba;
+  var currentCoordinates = currentPixel.split('-');
+  var swapCoordinates = closest.split('-');
+  var current = context.createImageData(1, 1);
+  var swap = context.createImageData(1, 1);
 
-  // remove pixel from both unsortedPixels and adjacentPixels array
+  current.data[0] = currentPixelValues[0];
+  current.data[1] = currentPixelValues[1];
+  current.data[2] = currentPixelValues[2];
+  current.data[3] = currentPixelValues[3];
 
-  // set the new values to the canvas
+  swap.data[0] = swapPixelValues[0];
+  swap.data[1] = swapPixelValues[1];
+  swap.data[2] = swapPixelValues[2];
+  swap.data[3] = swapPixelValues[3];
+
+  context.putImageData(current, swapCoordinates[0], swapCoordinates[1]);
+  context.putImageData(swap, currentCoordinates[0], currentCoordinates[1]);
+
+  pixelGraph[currentPixel].rgba = swapPixelValues;
+  pixelGraph[closest].rgba = currentPixelValues;
+
+  window.requestAnimationFrame(function() {
+    diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context);
+  });
 }
 
-function bloomSort(pixelGraph, unsortedPixels, adjacentPixels) {
+function bloomSort(pixelGraph, unsorted, adjacentPixels, context) {
   
 }
 
