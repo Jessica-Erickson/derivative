@@ -91,11 +91,14 @@ function startSort(graph, unsorted) {
   var startingPixel = unsorted[Math.floor(Math.random() * unsorted.length)];
   var adjacent = [];
 
-  unsortedPixels = unsorted.filter(pixel => pixel !== startingPixel);
-  
+  unsorted = unsorted.filter(pixel => pixel !== startingPixel);
+
   graph[startingPixel].adjacent.forEach(pixel => {
     adjacent.push(pixel);
   });
+
+  console.log(startingPixel);
+  console.log(graph[startingPixel].rgba);
 
   if (method === 'Virus ') {
     virusSort(graph, unsorted, adjacent);
@@ -112,10 +115,21 @@ function virusSort(pixelGraph, unsortedPixels, adjacentPixels) {
 
 function diamondSort(pixelGraph, unsortedPixels, adjacentPixels) {
   var currentPixel = adjacentPixels[0];
-  var cPHex = pixelGraph[currentPixel].rgba.reduce((acc, value) => {
-    var paddedHexValue = '0' + value.toString(16);
-    return acc += paddedHexValue.slice(-2);
-  }, '');
+  var sumValues = pixelGraph[currentPixel].adjacent.reduce((acc, pixel) => {
+    if (!unsortedPixels.includes(pixel)) {
+      pixelGraph[pixel].rgba.forEach((value, index) => {
+        acc[index] += value;
+      });
+      acc[4] += 1;
+    }
+    return acc;
+  }, [0, 0, 0, 0, 0]);
+  var targetValues = sumValues.reduce((acc, value, index, array) => {
+    if (index < 4) {
+      acc[index] = Math.floor(value / array[4]);
+    }
+    return acc;
+  }, [0, 0, 0, 0]);
 
   // find the closest value to that pixels sorted neighbors from all unsorted pixels
 
