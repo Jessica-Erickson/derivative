@@ -118,7 +118,7 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
   if (unsortedPixels.length === 1) {
     document.querySelector('input').disabled = false;
     document.querySelector('#errors').innerText = 'Done! Feel free to select another image to sort.';
-    return console.log('done');
+    return;
   }
 
   var currentPixel = adjacentPixels[0];
@@ -141,6 +141,7 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
     }
     return acc;
   }, [0, 0, 0, 0, 0]);
+
   var targetValues = sumValues.reduce((acc, value, index, array) => {
     if (index < 4) {
       acc[index] = Math.floor(value / array[4]);
