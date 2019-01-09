@@ -149,17 +149,6 @@ function bloomSort(pixelGraph, unsorted, adjacentPixels, context) {
   
 }
 
-function handleCurrentPixel() {
-  pixelGraph[currentPixel].isSorted = true;
-  unsortedPixels = unsortedPixels.filter(pixel => pixel !== currentPixel);
-  adjacentPixels = adjacentPixels.filter(pixel => pixel !== currentPixel);
-  pixelGraph[currentPixel].adjacent.forEach(pixel => {
-    if (!pixelGraph[pixel].isSorted) {
-      adjacentPixels.push(pixel);
-    }
-  });
-}
-
 function getSumValues(pixelGraph, currentPixel) {
   return pixelGraph[currentPixel].adjacent.reduce((acc, pixel) => {
     if (pixelGraph[pixel].isSorted) {
