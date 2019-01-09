@@ -33,6 +33,55 @@ function updateCanvasWithImage(image) {
   canvas.height = image.height;
   canvas.width = image.width;
   ctx.drawImage(image, 0, 0);
+
+  var imageData = ctx.getImageData(0,0, image.width, image.height);
+  createPixelGraph(imageData);
+}
+
+function Pixel (hex) {
+  this.hex = hex;
+  this.adjacent = [];
+}
+
+function createPixelGraph(data) {
+  var pixelGraph = {};
+  var unsortedPixels = [];
+  var imageData = data.data;
+  var height = data.height;
+  var width = data.width;
+
+  for (var i = 0; i < imageData.length; i += 4) {
+    var x = ((i / 4) % width);
+    var y = Math.floor((i / 4) / width);
+
+    var coordinates = x + '-' + y;
+
+    var top = x + '-' + (y - 1);
+    var right = (x + 1) + '-' + y;
+    var bottom = x + '-' + (y + 1);
+    var left = (x - 1) + '-' + y;
+
+    var fullHex = '';
+    for (var j = 0; j < 3; j++) {
+      var hexStart = '0' + imageData[i + j].toString(16);
+      fullHex += hexStart.slice(-2);
+    }
+
+    pixelGraph[coordinates] = new Pixel(fullHex);
+    if ((y - 1) >= 0) {
+      pixelGraph[coordinates].adjacent.push(top);
+    }
+    if ((x + 1) < width) {
+      pixelGraph[coordinates].adjacent.push(right);
+    }
+    if ((y + 1) < height) {
+      pixelGraph[coordinates].adjacent.push(bottom);
+    }
+    if ((x - 1) >= 0) {
+      pixelGraph[coordinates].adjacent.push(left);
+    }
+    unsortedPixels.push(coordinates);
+  }
 }
 
 document.querySelector('ul').addEventListener('click', makeActive);
