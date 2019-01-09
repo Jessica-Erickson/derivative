@@ -41,6 +41,7 @@ function updateCanvasWithImage(image) {
 function Pixel (r, g, b, a) {
   this.rgba = [r, g, b, a];
   this.adjacent = [];
+  this.isSorted = false;
 }
 
 function createPixelGraph(data) {
@@ -97,8 +98,7 @@ function startSort(graph, unsorted) {
     adjacent.push(pixel);
   });
 
-  console.log(startingPixel);
-  console.log(graph[startingPixel].rgba);
+  graph[startingPixel].isSorted = true;
 
   if (method === 'Virus ') {
     virusSort(graph, unsorted, adjacent);
@@ -116,7 +116,7 @@ function virusSort(pixelGraph, unsortedPixels, adjacentPixels) {
 function diamondSort(pixelGraph, unsortedPixels, adjacentPixels) {
   var currentPixel = adjacentPixels[0];
   var sumValues = pixelGraph[currentPixel].adjacent.reduce((acc, pixel) => {
-    if (!unsortedPixels.includes(pixel)) {
+    if (pixelGraph[pixel].isSorted) {
       pixelGraph[pixel].rgba.forEach((value, index) => {
         acc[index] += value;
       });
