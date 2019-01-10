@@ -121,10 +121,6 @@ function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context, bufferPi
 
   populateBufferPixels(buffer, unsortedPixels);
 
-  if (buffer.length === 1) {
-    enableInput();
-    return;
-  }
 
   var currentPixel = adjacentPixels[Math.floor(Math.random() * adjacentPixels.length)];
 
@@ -137,6 +133,11 @@ function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context, bufferPi
       adjacentPixels.push(pixel);
     }
   });
+  
+  if (buffer.length === 0) {
+    enableInput();
+    return;
+  }
 
   var sumValues = getSumValues(pixelGraph, currentPixel);
 
@@ -194,7 +195,7 @@ function enableInput() {
 }
 
 function populateBufferPixels(buffer, unsortedPixels) {
-  while (buffer.length < 500 && unsortedPixels.length) {
+  while (buffer.length < 1000 && unsortedPixels.length) {
     var randomPix = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)];
     unsortedPixels = unsortedPixels.filter(pixel => pixel !== randomPix);
     buffer.push(randomPix);
