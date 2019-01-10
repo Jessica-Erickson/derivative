@@ -35,6 +35,14 @@ function updateCanvasWithImage(image) {
   canvas.width = image.width;
   ctx.drawImage(image, 0, 0);
 
+  console.log(image.height, image.width)
+
+  if (image.height > image.width) {
+    canvas.style.minHeight = '50%';
+  } else {
+    canvas.style.minWidth = '50%';
+  }
+
   var imageData = ctx.getImageData(0,0, image.width, image.height);
   createPixelGraph(imageData, ctx);
 }
@@ -133,7 +141,7 @@ function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context, bufferPi
       adjacentPixels.push(pixel);
     }
   });
-  
+
   if (buffer.length === 0) {
     enableInput();
     return;
