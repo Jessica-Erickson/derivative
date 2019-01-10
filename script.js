@@ -110,14 +110,39 @@ function startSort(graph, unsorted, ctx) {
   }
 }
 
-function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
-  
+function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context, bufferPixels) {
+  var buffer = [];
+
+  if (!bufferPixels) {
+    while (buffer.length < 500 && unsortedPixels.length) {
+      var randomPix = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)];
+      unsortedPixels = unsortedPixels.filter(pixel => pixel !== randomPix);
+      buffer.push(randomPix);
+    }
+  } else {
+    buffer = bufferPixels;
+  }
+
+  if (buffer.length === 1) {
+    enableInput();
+    return;
+  }
+
+  var currentPixel = adjacentPixels[Math.floor(Math.random() * adjacentPixels.length)];
+
+  pixelGraph[currentPixel].isSorted = true;
+  buffer = buffer.filter(pixel => pixel !== currentPixel);
+  adjacentPixels = adjacentPixels.filter(pixel => pixel !== currentPixel);
+  pixelGraph[currentPixel].adjacent.forEach(pixel => {
+    if (!pixelGraph[pixel].isSorted) {
+      adjacentPixels.push(pixel);
+    }
+  });
 }
 
 function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
   if (unsortedPixels.length === 1) {
-    document.querySelector('input').disabled = false;
-    document.querySelector('#errors').innerText = 'Done! Feel free to select another image to sort.';
+    enableInput();
     return;
   }
 
@@ -146,7 +171,15 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
 }
 
 function bloomSort(pixelGraph, unsorted, adjacentPixels, context) {
-  
+  if (unsortedPixels.length === 1) {
+    enableInput();
+    return;
+  }
+}
+
+function enableInput() {
+  document.querySelector('input').disabled = false;
+  document.querySelector('#errors').innerText = 'Done! Feel free to select another image to sort.';
 }
 
 function getSumValues(pixelGraph, currentPixel) {
