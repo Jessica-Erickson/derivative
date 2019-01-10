@@ -1,12 +1,27 @@
 <!DOCTYPE html>
-  <html>
-    <head>
-      <title>Derivative</title>
-      <script type='text/javascript' src='script.js' async></script>
-      <link rel='stylesheet' type='text/css' href='style.css'>
-    </head>
-    <body>
-      <input type='file' id='userImage' accept='.jpg,.jpeg,.png'>
-      <canvas id='canvas'></canvas>
-    </body>
-  </html>
+<html>
+  <head>
+    <title>Derivative</title>
+    <link href="https://fonts.googleapis.com/css?family=Merienda" rel="stylesheet">
+    <link rel='stylesheet' type='text/css' href='style.css'>
+  </head>
+  <body>
+    <h1>DERIVATIVE</h1>
+    <aside>
+      <h3>Choose a sort method:</h3>
+      <ul>
+        <li class='active sort-method'>Virus <img src="assets/virus.svg" class='sort-img' /></li>
+        <li class='sort-method'>Diamond <img src="assets/diamond.svg" class='sort-img' /></li>
+        <li class='sort-method'>Bloom <img src="assets/bloom.svg" class='sort-img'></li>
+      </ul>
+      <h3 class='pale-green'>Choose an image smaller than 2MB to sort:</h3>
+      <input type='file' accept='.jpg,.jpeg,.png' />
+      <div>
+        <label for='errors'>Feedback Message:</label>
+        <p id='errors'>None</p>
+      </div>
+    </aside>
+    <canvas id='canvas' height='0' width='0'></canvas>
+    <script type='text/javascript' src='script.js'></script>
+  </body>
+</html>

@@ -1,13 +1,83 @@
-#userImage {
-  display: block;
-  max-width: 95vw;
-  min-width: 94vw;
-  overflow: hidden;
+body {
+  background-color: #3B3F59;
+  box-sizing: border-box;
+  color: #FCC0A3;
+  display: grid;
+  font-family: 'Merienda', cursive;
+  grid: auto 1fr / 250px 1fr; 
+  height: 100vh;
+  margin: 0;
+  padding: 0 25px 25px 0;
 }
 
-#canvas {
+main {
+  display: inline-block;
+}
+
+h1 {
+  font-size: 250%;
+  grid-column: 1 / span 2;
+  text-align: center;
+}
+
+h3 {
+  font-weight: 300;
+  margin: 0;
+  padding-left: 25px;
+}
+
+img {
+  height: 30px;
+  margin: 10px;
+  width: 30px;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  align-items: center;
+  background-color: #E18C92;
+  border-radius: 5px;
+  color: #FCEDC2;
+  display: flex;
+  justify-content: center;
+  margin: 25px;
+  padding-left: 15px;
+}
+
+li:hover {
+  background-color: #B2607B;
+  cursor: pointer;
+}
+
+input {
   display: block;
-  margin: 10px auto;
-  max-height: 90vh;
-  max-width: 95vw;
+  margin: 25px 0;
+  padding: 10px 25px;
+  width: 200px;
+}
+
+canvas {
+  align-self: center;
+  background-color: white;
+  display: block;
+  margin: 0 auto;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+div {
+  padding-left: 25px;
+}
+
+p {
+  margin: 10px 0;
+}
+
+.active {
+  background-color: #B2607B;
 }

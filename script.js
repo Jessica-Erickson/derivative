@@ -1,220 +1,81 @@
-var input = document.getElementById('userImage');
-var canvas = document.getElementById('canvas')
-var ctx = canvas.getContext('2d');
-var newImage = new Image();
-var newImageData = {};
-var pixelGraph = {};
-var unsortedPixels = [];
-var bufferPixels = [];
-var sortedPixels = [];
-var adjacentPixels = [];
+function makeActive(e) {
+  if (e.target.classList.contains('sort-method')) {
+    document.querySelectorAll('li').forEach(function(option) {
+      option.classList.remove('active');
+    });
+    e.target.classList.add('active');
+  } else if (e.target.classList.contains('sort-img')) {
+    document.querySelectorAll('li').forEach(function(option) {
+      option.classList.remove('active');
+    });
+    e.target.parentElement.classList.add('active');
+  }
+}
 
-input.addEventListener('change', setImageToCanvas);
-
-function setImageToCanvas (event) {
-  if (event.target.files && event.target.files[0]) {
-    resetPixelGraph();
-    resetPixelArrays();
-    var imageURL = URL.createObjectURL(event.target.files[0]);
-    newImage.addEventListener('load', updateCanvasWithImage);
+function setImageToCanvas(e) {
+  if (e.target.files && e.target.files[0] && e.target.files[0].size < 2097152) {
+    var newImage = new Image();
+    var imageURL = URL.createObjectURL(e.target.files[0]);
+    newImage.addEventListener('load', function() {
+      updateCanvasWithImage(newImage);
+      URL.revokeObjectURL(imageURL);
+    }, { once: true });
     newImage.src = imageURL;
-  }
+    document.querySelector('#errors').innerText = 'Please wait while your picture is sorted. This may take a while. Refresh the page to start over.';
+    document.querySelector('input').disabled = true;
+  } else if (e.target.files[0] && e.target.files[0].size > 2097152) {
+    document.querySelector('#errors').innerText = 'Please select a smaller image to sort.';
+  } 
 }
 
-function resetPixelGraph () {
-  pixelGraph = {};
-}
+function updateCanvasWithImage(image) {
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  canvas.height = image.height;
+  canvas.width = image.width;
+  ctx.drawImage(image, 0, 0);
 
-function resetPixelArrays () {
-  unsortedPixels = [];
-  bufferPixels = [];
-  sortedPixels = [];
-  adjacentPixels = [];
-}
-
-function updateCanvasWithImage () {
-  setCanvasDimensions();
-  ctx.drawImage(newImage,0,0);
-  getNewImageData();
-  createPixelGraph();
-  getStartingPixel();
-  populateBufferPixels();
-  newImage.removeEventListener('load', updateCanvasWithImage);
-  resetNewImage();
-  resetNewImageData();
-  window.requestAnimationFrame(swapPixels);
-}
-
-function swapPixels () {
-  if (adjacentPixels.length > 0 && bufferPixels.length > 0) {
-    var selected = adjacentPixels[Math.floor(Math.random() * adjacentPixels.length)];
-    var processedAdjacents = pixelGraph[selected].adjacent.filter(function (neighbor) {
-      return sortedPixels.includes(neighbor);
-    });
-    var valueToCompare = processedAdjacents.reduce(function (acc, pixel) {
-      pixelGraph[pixel].rgba.forEach(function (num) {
-        acc += (num / (processedAdjacents.length * 4));
-      });
-      return acc;
-    }, 0);
-
-    var closestValue = '';
-    bufferPixels.forEach(function (pixel) {
-      if (closestValue === '') {
-        closestValue = pixel;
-      }
-      var existingValue = pixelGraph[closestValue].rgba.reduce(function (acc, num) {
-        return acc += (num / 4);
-      },0);
-      var newValue = pixelGraph[pixel].rgba.reduce(function (acc, num) {
-        return acc += (num / 4);
-      },0);
-      if (Math.abs(valueToCompare - existingValue) > Math.abs(valueToCompare - newValue)) {
-        closestValue = pixel;
-      }
-    });
-
-    var bufferColors = pixelGraph[selected].rgba;
-    pixelGraph[selected].rgba = pixelGraph[closestValue].rgba;
-    pixelGraph[closestValue].rgba = bufferColors;
-
-    var selectedCoordinates = selected.split('-');
-    var bufferCoordinates = closestValue.split('-');
-    var cSelected = ctx.createImageData(1, 1);
-    var cBuffer = ctx.createImageData(1, 1);
-
-    cSelected.data[0] = pixelGraph[closestValue].rgba[0];
-    cSelected.data[1] = pixelGraph[closestValue].rgba[1];
-    cSelected.data[2] = pixelGraph[closestValue].rgba[2];
-    cSelected.data[3] = pixelGraph[closestValue].rgba[3];
-    ctx.putImageData(cSelected, bufferCoordinates[0], bufferCoordinates[1]);
-
-    cBuffer.data[0] = pixelGraph[selected].rgba[0];
-    cBuffer.data[1] = pixelGraph[selected].rgba[1];
-    cBuffer.data[2] = pixelGraph[selected].rgba[2];
-    cBuffer.data[3] = pixelGraph[selected].rgba[3];
-    ctx.putImageData(cBuffer, selectedCoordinates[0], selectedCoordinates[1]);
-
-    adjacentPixels = adjacentPixels.filter(function (pixel) {
-      return pixel !== selected;
-    });
-    sortedPixels.push(selected);
-
-    pixelGraph[selected].adjacent.forEach(function (pixel) {
-      if (!sortedPixels.includes(pixel) && !adjacentPixels.includes(pixel)) {
-        adjacentPixels.push(pixel);
-      }
-      if (bufferPixels.includes(pixel)) {
-        bufferPixels = bufferPixels.filter(function (coordinates) {
-          return coordinates !== pixel;
-        });
-        if (unsortedPixels.length > 0) {
-          var newPixel = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)]
-          bufferPixels.push(newPixel);
-          unsortedPixels = unsortedPixels.filter(function (string) {
-            return string !== newPixel;
-          });
-        }
-      }
-      if (unsortedPixels.includes(pixel)) {
-        unsortedPixels = unsortedPixels.filter(function (coordinates) {
-          return coordinates !== pixel;
-        });
-      }
-    });
-  } else if (adjacentPixels.length > 1) {
-    var selected = adjacentPixels[Math.floor(Math.random() * adjacentPixels.length)];
-    var processedAdjacents = pixelGraph[selected].adjacent.filter(function (neighbor) {
-      return sortedPixels.includes(neighbor);
-    });
-    var valueToCompare = processedAdjacents.reduce(function (acc, pixel) {
-      pixelGraph[pixel].rgba.forEach(function (num) {
-        acc += (num / (processedAdjacents.length * 4));
-      });
-      return acc;
-    }, 0);
-
-    adjacentPixels = adjacentPixels.filter(function (pixel) {
-      return pixel !== selected;
-    });
-    sortedPixels.push(selected);
-
-    var closestValue = '';
-    adjacentPixels.forEach(function (pixel) {
-      if (closestValue === '') {
-        closestValue = pixel;
-      }
-      var existingValue = pixelGraph[closestValue].rgba.reduce(function (acc, num) {
-        return acc += (num / 4);
-      },0);
-      var newValue = pixelGraph[pixel].rgba.reduce(function (acc, num) {
-        return acc += (num / 4);
-      },0);
-      if (Math.abs(valueToCompare - existingValue) > Math.abs(valueToCompare - newValue)) {
-        closestValue = pixel;
-      }
-    });
-
-    var bufferColors = pixelGraph[selected].rgba;
-    pixelGraph[selected].rgba = pixelGraph[closestValue].rgba;
-    pixelGraph[closestValue].rgba = bufferColors;
-
-    var selectedCoordinates = selected.split('-');
-    var bufferCoordinates = closestValue.split('-');
-    var cSelected = ctx.createImageData(1, 1);
-    var cBuffer = ctx.createImageData(1, 1);
-
-    cSelected.data[0] = pixelGraph[closestValue].rgba[0];
-    cSelected.data[1] = pixelGraph[closestValue].rgba[1];
-    cSelected.data[2] = pixelGraph[closestValue].rgba[2];
-    cSelected.data[3] = pixelGraph[closestValue].rgba[3];
-    ctx.putImageData(cSelected, bufferCoordinates[0], bufferCoordinates[1]);
-
-    cBuffer.data[0] = pixelGraph[selected].rgba[0];
-    cBuffer.data[1] = pixelGraph[selected].rgba[1];
-    cBuffer.data[2] = pixelGraph[selected].rgba[2];
-    cBuffer.data[3] = pixelGraph[selected].rgba[3];
-    ctx.putImageData(cBuffer, selectedCoordinates[0], selectedCoordinates[1]);
-
-    pixelGraph[selected].adjacent.forEach(function (pixel) {
-      if (!sortedPixels.includes(pixel) && !adjacentPixels.includes(pixel)) {
-        adjacentPixels.push(pixel);
-      }
-    });
+  if (image.height > image.width) {
+    canvas.style.minHeight = '50%';
   } else {
-    console.log('done!');
-    return;
+    canvas.style.minWidth = '50%';
   }
-  window.requestAnimationFrame(swapPixels);
+
+  var imageData = ctx.getImageData(0,0, image.width, image.height);
+  createPixelGraph(imageData, ctx);
 }
 
-function setCanvasDimensions () {
-  canvas.height = newImage.height;
-  canvas.width = newImage.width;
+function Pixel (r, g, b, a) {
+  this.rgba = [r, g, b, a];
+  this.adjacent = [];
+  this.isSorted = false;
 }
 
-function getNewImageData () {
-  newImageData = ctx.getImageData(0,0,newImage.width,newImage.height);
-}
+function createPixelGraph(data, context) {
+  var pixelGraph = {};
+  var unsortedPixels = [];
+  var imageData = data.data;
+  var height = data.height;
+  var width = data.width;
 
-function createPixelGraph () {
-  var imageData = newImageData.data;
-  var height = newImageData.height;
-  var width = newImageData.width;
   for (var i = 0; i < imageData.length; i += 4) {
     var x = ((i / 4) % width);
     var y = Math.floor((i / 4) / width);
+
     var coordinates = x + '-' + y;
+
     var top = x + '-' + (y - 1);
     var right = (x + 1) + '-' + y;
     var bottom = x + '-' + (y + 1);
     var left = (x - 1) + '-' + y;
+
     pixelGraph[coordinates] = new Pixel(
       imageData[i], 
       imageData[i + 1], 
       imageData[i + 2], 
       imageData[i + 3]
     );
+
     if ((y - 1) >= 0) {
       pixelGraph[coordinates].adjacent.push(top);
     }
@@ -229,43 +90,245 @@ function createPixelGraph () {
     }
     unsortedPixels.push(coordinates);
   }
+
+  startSort(pixelGraph, unsortedPixels, context);
 }
 
-function resetNewImage () {
-  newImage = new Image();
-}
+function startSort(graph, unsorted, ctx) {
+  var method = document.querySelector('.active').innerText;
+  var startingPixel = unsorted[Math.floor(Math.random() * unsorted.length)];
+  var adjacent = [];
 
-function resetNewImageData () {
-  newImageData = {};
-}
+  unsorted = unsorted.filter(pixel => pixel !== startingPixel);
 
-function Pixel (r, g, b, a) {
-  this.rgba = [r,g,b,a];
-  this.adjacent = [];
-}
-
-function getStartingPixel () {
-  var startingPixel = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)];
-  sortedPixels.push(startingPixel);
-  unsortedPixels = unsortedPixels.filter(function (coordinate) {
-    return coordinate !== startingPixel;
+  graph[startingPixel].adjacent.forEach(pixel => {
+    adjacent.push(pixel);
   });
-  pixelGraph[startingPixel].adjacent.forEach(function (raddish) {
-    adjacentPixels.push(raddish);
-    unsortedPixels = unsortedPixels.filter(function (turnip) {
-      return turnip !== raddish;
-    });
-  });
-}
 
-function populateBufferPixels () {
-  while (bufferPixels.length < 1000) {
-    var pixel = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)];
-    unsortedPixels = unsortedPixels.filter(function (coordinate) {
-      return coordinate !== pixel;
-    });
-    if (!sortedPixels.includes(pixel) && !adjacentPixels.includes(pixel)) {
-      bufferPixels.push(pixel);
-    }
+  graph[startingPixel].isSorted = true;
+
+  if (method === 'Virus ') {
+    virusSort(graph, unsorted, adjacent, ctx);
+  } else if (method === 'Diamond ') {
+    diamondSort(graph, unsorted, adjacent, ctx);
+  } else {
+    bloomSort(graph, unsorted, adjacent, ctx);
   }
 }
+
+function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context, bufferPixels) {
+  var buffer = [];
+
+  if (!bufferPixels) {
+    populateBufferPixels(buffer, unsortedPixels, 1000);
+  } else {
+    buffer = bufferPixels;
+  }
+
+  populateBufferPixels(buffer, unsortedPixels, 1000);
+
+  var currentPixel = adjacentPixels[Math.floor(Math.random() * adjacentPixels.length)];
+
+  pixelGraph[currentPixel].isSorted = true;
+  buffer = buffer.filter(pixel => pixel !== currentPixel);
+  unsortedPixels = unsortedPixels.filter(pixel => pixel !== currentPixel);
+  adjacentPixels = adjacentPixels.filter(pixel => pixel !== currentPixel);
+  pixelGraph[currentPixel].adjacent.forEach(pixel => {
+    if (!pixelGraph[pixel].isSorted) {
+      adjacentPixels.push(pixel);
+    }
+  });
+
+  if (buffer.length === 0) {
+    enableInput();
+    return;
+  }
+
+  var sumValues = getSumValues(pixelGraph, currentPixel);
+
+  var targetValues = getTargetValues(sumValues);
+
+  var closest = getClosest(buffer, pixelGraph, targetValues);
+
+  swapPixels(currentPixel, closest, pixelGraph, context);
+
+  window.requestAnimationFrame(function() {
+    virusSort(pixelGraph, unsortedPixels, adjacentPixels, context, buffer);
+  });
+}
+
+function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
+  if (unsortedPixels.length === 1) {
+    enableInput();
+    return;
+  }
+
+  var currentPixel = adjacentPixels[0];
+
+  pixelGraph[currentPixel].isSorted = true;
+  unsortedPixels = unsortedPixels.filter(pixel => pixel !== currentPixel);
+  adjacentPixels = adjacentPixels.filter(pixel => pixel !== currentPixel);
+  pixelGraph[currentPixel].adjacent.forEach(pixel => {
+    if (!pixelGraph[pixel].isSorted) {
+      adjacentPixels.push(pixel);
+    }
+  });
+
+  var sumValues = getSumValues(pixelGraph, currentPixel);
+
+  var targetValues = getTargetValues(sumValues);
+
+  var closest = getClosest(unsortedPixels, pixelGraph, targetValues);
+
+  swapPixels(currentPixel, closest, pixelGraph, context);
+
+  window.requestAnimationFrame(function() {
+    diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context);
+  });
+}
+
+function bloomSort(pixelGraph, unsortedPixels, adjacentPixels, context, bufferPixels) {
+
+  var buffer = [];
+
+  if (!bufferPixels || !bufferPixels.length) {
+    while (buffer.length < 10 && adjacentPixels.length) {
+      var randomPix = adjacentPixels[adjacentPixels.length - (Math.floor(adjacentPixels.length / 4) + 1)];
+      adjacentPixels = adjacentPixels.filter(pixel => pixel !== randomPix);
+      buffer.push(randomPix);
+    }
+  } else {
+    buffer = bufferPixels;
+  }
+
+  var currentPixel = getCurrentBloomPixel(buffer);
+
+  pixelGraph[currentPixel].isSorted = true;
+  buffer = buffer.filter(pixel => pixel !== currentPixel);
+  unsortedPixels = unsortedPixels.filter(pixel => pixel !== currentPixel);
+  adjacentPixels = adjacentPixels.filter(pixel => pixel !== currentPixel);
+  pixelGraph[currentPixel].adjacent.forEach(pixel => {
+    if (!pixelGraph[pixel].isSorted) {
+      adjacentPixels.push(pixel);
+    }
+  });
+
+  if (!unsortedPixels.length) {
+    enableInput();
+    return;
+  }
+
+  var sumValues = getSumValues(pixelGraph, currentPixel);
+
+  var targetValues = getTargetValues(sumValues);
+
+  var closest = getClosest(unsortedPixels, pixelGraph, targetValues);
+
+  swapPixels(currentPixel, closest, pixelGraph, context);
+
+  window.requestAnimationFrame(function() {
+    bloomSort(pixelGraph, unsortedPixels, adjacentPixels, context, buffer);
+  });
+}
+
+function getCurrentBloomPixel(buffer) {
+  return buffer.reduce((acc, coords) => {
+    var currentCoords = coords.split('-');
+    var lastCoords = acc.split('-');
+
+    if (acc !== '') {
+      var currentDiff = currentCoords.reduce((acc, value) => {
+        return acc += parseInt(value);
+      }, 0);
+      var lastDiff = lastCoords.reduce((acc, value) => {
+        return acc += parseInt(value);
+      }, 0);
+    } else {
+      acc = coords;
+    }
+
+    if (currentDiff > lastDiff) {
+      acc = coords;
+    }
+
+    return acc;
+  }, '');
+}
+
+function enableInput() {
+  document.querySelector('input').disabled = false;
+  document.querySelector('#errors').innerText = 'Done! Feel free to select another image to sort.';
+}
+
+function populateBufferPixels(buffer, unsortedPixels, targetLength) {
+  while (buffer.length < targetLength && unsortedPixels.length) {
+    var randomPix = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)];
+    unsortedPixels = unsortedPixels.filter(pixel => pixel !== randomPix);
+    buffer.push(randomPix);
+  }
+}
+
+function getSumValues(pixelGraph, currentPixel) {
+  return pixelGraph[currentPixel].adjacent.reduce((acc, pixel) => {
+    if (pixelGraph[pixel].isSorted) {
+      pixelGraph[pixel].rgba.forEach((value, index) => {
+        acc[index] += value;
+      });
+      acc[4] += 1;
+    }
+    return acc;
+  }, [0, 0, 0, 0, 0]);
+}
+
+function getTargetValues(sumValues) {
+  return sumValues.reduce((acc, value, index, array) => {
+    if (index < 4) {
+      acc[index] = Math.floor(value / array[4]);
+    }
+    return acc;
+  }, [0, 0, 0, 0]);
+}
+
+function getClosest(unsortedPixels, pixelGraph, targetValues) {
+  return unsortedPixels.reduce((acc, coords) => {
+    if (acc !== '') {
+      var lastDiff = pixelGraph[acc].rgba.reduce((acc, value, index) => {
+        return acc += Math.abs(value - targetValues[index]);
+      }, 0);
+
+      var currentDiff = pixelGraph[coords].rgba.reduce((acc, value, index) => {
+        return acc += Math.abs(value - targetValues[index]);
+      }, 0);
+    } else {
+      acc = coords;
+    }
+
+    if (currentDiff < lastDiff) {
+      acc = coords;
+    }
+    return acc;
+  }, '');
+}
+
+function swapPixels(currentPixel, closest, pixelGraph, context) {
+  var currentPixelValues = pixelGraph[currentPixel].rgba;
+  var swapPixelValues = pixelGraph[closest].rgba;
+  var currentCoordinates = currentPixel.split('-');
+  var swapCoordinates = closest.split('-');
+  var current = context.createImageData(1, 1);
+  var swap = context.createImageData(1, 1);
+
+  for (var i = 0; i < 4; i++) {
+    current.data[i] = currentPixelValues[i];
+    swap.data[i] = swapPixelValues[i];
+  }
+
+  context.putImageData(current, swapCoordinates[0], swapCoordinates[1]);
+  context.putImageData(swap, currentCoordinates[0], currentCoordinates[1]);
+
+  pixelGraph[currentPixel].rgba = swapPixelValues;
+  pixelGraph[closest].rgba = currentPixelValues;
+}
+
+document.querySelector('ul').addEventListener('click', makeActive);
+document.querySelector('input').addEventListener('change', setImageToCanvas);
