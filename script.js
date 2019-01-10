@@ -35,8 +35,6 @@ function updateCanvasWithImage(image) {
   canvas.width = image.width;
   ctx.drawImage(image, 0, 0);
 
-  console.log(image.height, image.width)
-
   if (image.height > image.width) {
     canvas.style.minHeight = '50%';
   } else {
@@ -122,13 +120,12 @@ function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context, bufferPi
   var buffer = [];
 
   if (!bufferPixels) {
-    populateBufferPixels(buffer, unsortedPixels);
+    populateBufferPixels(buffer, unsortedPixels, 1000);
   } else {
     buffer = bufferPixels;
   }
 
-  populateBufferPixels(buffer, unsortedPixels);
-
+  populateBufferPixels(buffer, unsortedPixels, 1000);
 
   var currentPixel = adjacentPixels[Math.floor(Math.random() * adjacentPixels.length)];
 
@@ -190,11 +187,72 @@ function diamondSort(pixelGraph, unsortedPixels, adjacentPixels, context) {
   });
 }
 
-function bloomSort(pixelGraph, unsorted, adjacentPixels, context) {
-  if (unsortedPixels.length === 1) {
+function bloomSort(pixelGraph, unsortedPixels, adjacentPixels, context, bufferPixels) {
+
+  var buffer = [];
+
+  if (!bufferPixels || !bufferPixels.length) {
+    while (buffer.length < 10 && adjacentPixels.length) {
+      var randomPix = adjacentPixels[adjacentPixels.length - (Math.floor(adjacentPixels.length / 4) + 1)];
+      adjacentPixels = adjacentPixels.filter(pixel => pixel !== randomPix);
+      buffer.push(randomPix);
+    }
+  } else {
+    buffer = bufferPixels;
+  }
+
+  var currentPixel = getCurrentBloomPixel(buffer);
+
+  pixelGraph[currentPixel].isSorted = true;
+  buffer = buffer.filter(pixel => pixel !== currentPixel);
+  unsortedPixels = unsortedPixels.filter(pixel => pixel !== currentPixel);
+  adjacentPixels = adjacentPixels.filter(pixel => pixel !== currentPixel);
+  pixelGraph[currentPixel].adjacent.forEach(pixel => {
+    if (!pixelGraph[pixel].isSorted) {
+      adjacentPixels.push(pixel);
+    }
+  });
+
+  if (!unsortedPixels.length) {
     enableInput();
     return;
   }
+
+  var sumValues = getSumValues(pixelGraph, currentPixel);
+
+  var targetValues = getTargetValues(sumValues);
+
+  var closest = getClosest(unsortedPixels, pixelGraph, targetValues);
+
+  swapPixels(currentPixel, closest, pixelGraph, context);
+
+  window.requestAnimationFrame(function() {
+    bloomSort(pixelGraph, unsortedPixels, adjacentPixels, context, buffer);
+  });
+}
+
+function getCurrentBloomPixel(buffer) {
+  return buffer.reduce((acc, coords) => {
+    var currentCoords = coords.split('-');
+    var lastCoords = acc.split('-');
+
+    if (acc !== '') {
+      var currentDiff = currentCoords.reduce((acc, value) => {
+        return acc += parseInt(value);
+      }, 0);
+      var lastDiff = lastCoords.reduce((acc, value) => {
+        return acc += parseInt(value);
+      }, 0);
+    } else {
+      acc = coords;
+    }
+
+    if (currentDiff > lastDiff) {
+      acc = coords;
+    }
+
+    return acc;
+  }, '');
 }
 
 function enableInput() {
@@ -202,8 +260,8 @@ function enableInput() {
   document.querySelector('#errors').innerText = 'Done! Feel free to select another image to sort.';
 }
 
-function populateBufferPixels(buffer, unsortedPixels) {
-  while (buffer.length < 1000 && unsortedPixels.length) {
+function populateBufferPixels(buffer, unsortedPixels, targetLength) {
+  while (buffer.length < targetLength && unsortedPixels.length) {
     var randomPix = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)];
     unsortedPixels = unsortedPixels.filter(pixel => pixel !== randomPix);
     buffer.push(randomPix);
