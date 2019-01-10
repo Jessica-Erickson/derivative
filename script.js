@@ -114,14 +114,12 @@ function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context, bufferPi
   var buffer = [];
 
   if (!bufferPixels) {
-    while (buffer.length < 500 && unsortedPixels.length) {
-      var randomPix = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)];
-      unsortedPixels = unsortedPixels.filter(pixel => pixel !== randomPix);
-      buffer.push(randomPix);
-    }
+    populateBufferPixels(buffer, unsortedPixels);
   } else {
     buffer = bufferPixels;
   }
+
+  populateBufferPixels(buffer, unsortedPixels);
 
   if (buffer.length === 1) {
     enableInput();
@@ -132,11 +130,24 @@ function virusSort(pixelGraph, unsortedPixels, adjacentPixels, context, bufferPi
 
   pixelGraph[currentPixel].isSorted = true;
   buffer = buffer.filter(pixel => pixel !== currentPixel);
+  unsortedPixels = unsortedPixels.filter(pixel => pixel !== currentPixel);
   adjacentPixels = adjacentPixels.filter(pixel => pixel !== currentPixel);
   pixelGraph[currentPixel].adjacent.forEach(pixel => {
     if (!pixelGraph[pixel].isSorted) {
       adjacentPixels.push(pixel);
     }
+  });
+
+  var sumValues = getSumValues(pixelGraph, currentPixel);
+
+  var targetValues = getTargetValues(sumValues);
+
+  var closest = getClosest(buffer, pixelGraph, targetValues);
+
+  swapPixels(currentPixel, closest, pixelGraph, context);
+
+  window.requestAnimationFrame(function() {
+    virusSort(pixelGraph, unsortedPixels, adjacentPixels, context, buffer);
   });
 }
 
@@ -180,6 +191,14 @@ function bloomSort(pixelGraph, unsorted, adjacentPixels, context) {
 function enableInput() {
   document.querySelector('input').disabled = false;
   document.querySelector('#errors').innerText = 'Done! Feel free to select another image to sort.';
+}
+
+function populateBufferPixels(buffer, unsortedPixels) {
+  while (buffer.length < 500 && unsortedPixels.length) {
+    var randomPix = unsortedPixels[Math.floor(Math.random() * unsortedPixels.length)];
+    unsortedPixels = unsortedPixels.filter(pixel => pixel !== randomPix);
+    buffer.push(randomPix);
+  }
 }
 
 function getSumValues(pixelGraph, currentPixel) {
