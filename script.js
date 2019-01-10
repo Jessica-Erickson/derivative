@@ -21,7 +21,7 @@ function setImageToCanvas(e) {
       URL.revokeObjectURL(imageURL);
     }, { once: true });
     newImage.src = imageURL;
-    document.querySelector('#errors').innerText = 'Please wait while your picture is sorted. This may take a while. Refresh the page to choose a different image.';
+    document.querySelector('#errors').innerText = 'Please wait while your picture is sorted. This may take a while. Refresh the page to start over.';
     document.querySelector('input').disabled = true;
   } else if (e.target.files[0] && e.target.files[0].size > 2097152) {
     document.querySelector('#errors').innerText = 'Please select a smaller image to sort.';
