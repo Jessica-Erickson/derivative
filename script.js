@@ -37,7 +37,9 @@ function updateCanvasWithImage(image) {
 
   if (image.height > image.width) {
     canvas.style.minHeight = '50%';
+    canvas.style.minWidth = '0';
   } else {
+    canvas.style.minHeight = '0';
     canvas.style.minWidth = '50%';
   }
 
