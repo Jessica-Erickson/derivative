@@ -42,15 +42,15 @@ Note: When a buffer pixel's coordinates are added to the frontier array, it is r
 
 ### Sorted with Virus:
 
-![An image of a red panda that has been sorted with the virus method](./assets/derivative-panda.png)
+![An image of a red panda that has been sorted with the virus method](./assets/viruspanda.png)
 
 ### Sorted with Diamond:
 
-![An image of a red panda that has been sorted with the diamond method](./assets/derivative-panda.png)
+![An image of a red panda that has been sorted with the diamond method](./assets/diamondpanda.png)
 
 ### Sorted with Bloom:
 
-![An image of a red panda that has been sorted with the bloom method](./assets/derivative-panda.png)
+![An image of a red panda that has been sorted with the bloom method](./assets/bloompanda.png)
 
 ## Why did I make this?
 
